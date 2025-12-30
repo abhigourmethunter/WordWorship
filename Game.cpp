@@ -4,14 +4,22 @@
 #include <cmath>
 #include <fstream>
 
-Game::Game(const int screen_width, const int screen_height) : timer(0), SCREEN_WIDTH(screen_width), SCREEN_HEIGHT(screen_height) {
+Game::Game(const int screen_width, const int screen_height)
+    : SCREEN_WIDTH(screen_width),
+      SCREEN_HEIGHT(screen_height),
+      wordSpawnTimer(0.0f),
+      difficultyTimer(0.0f),
+      wordSpawnInterval(2.0f),
+      wordFallSpeed(80.0f) {
+
     heartTexture = LoadTexture("assets/art/Hearts/heart_animated_1.png");
 
-    for(int i = 1; i < MAX_LIVES; i++) {
+    for (int i = 1; i < MAX_LIVES; i++) {
         heartAnims[i] = Animation(0, 4, 1, 0.1f, Animation::AnimationType::Once);
     }
 
     heartAnims[0] = Animation(0, 4, 1, 0.1f, Animation::AnimationType::PingPong);
+
     loadHighScore();
     loadAudios();
 
@@ -22,6 +30,7 @@ Game::Game(const int screen_width, const int screen_height) : timer(0), SCREEN_W
     PlayMusicStream(mainMenuMusic);
     resetGame();
 }
+
 
 Game::~Game() {
     UnloadTexture(heartTexture);
@@ -86,7 +95,7 @@ void Game::loadAudios() {
     gameOverSound = LoadSound("assets/audio/sound_effects/game_over.wav");
     typingSound = LoadSound("assets/audio/sound_effects/typing.wav");
     mainMenuMusic = LoadMusicStream("assets/audio/music/menu_music.wav");
-    gameplayMusic = LoadMusicStream("assets/audio/music/gameplay_music.wav");
+    gameplayMusic = LoadMusicStream("assets/audio/music/blah.mp3");
 }
 
 void Game::unloadAudios() {
@@ -101,6 +110,7 @@ void Game::unloadAudios() {
 void Game::updatePlay() {
     UpdateMusicStream(gameplayMusic);
 
+    float dt = GetFrameTime();
     matchesReduced = false;
 
     if(IsKeyPressed(KEY_SPACE)) {
@@ -109,8 +119,10 @@ void Game::updatePlay() {
         return;
     }
 
-    if (!timer) {
-        resetTimer();
+    wordSpawnTimer += dt;
+    if (wordSpawnTimer >= wordSpawnInterval) {
+        wordSpawnTimer -= wordSpawnInterval;
+
         std::string newWord = WordBank::getRandomWord();
         activeWords.push_back(Word{newWord, (float)(rand() % (SCREEN_WIDTH - MeasureText(newWord.c_str(), TEXT_SIZE))), 0.0f});
     }
@@ -156,7 +168,7 @@ void Game::updatePlay() {
             it->isPotentialMatched = false;
         }
         
-        it->y += WORD_FALLING_SPEED;
+        it->y += wordFallSpeed * dt;
         
         if (it->y > SCREEN_HEIGHT - (TEXT_SIZE*2) - 15) {
             if(it->isPotentialMatched) {
@@ -190,20 +202,18 @@ void Game::updatePlay() {
         }
     }
         
-    cursorBlinkTimer += GetFrameTime();
+    cursorBlinkTimer += dt;
 
-    if(frameCounter % GetFPS() == 0){
-        seconds++;
-        if(seconds % WORD_RATE_UPDATE_TIME == 0){
-            wordRate--;  
-            if(wordRate < 20) {
-                wordRate = 20;
-            }
-        }
+    difficultyTimer += dt;
+    if (difficultyTimer >= WORD_RATE_UPDATE_TIME) {
+        difficultyTimer -= WORD_RATE_UPDATE_TIME;
+
+        wordSpawnInterval *= 0.92f;
+        if (wordSpawnInterval < 0.4f)
+            wordSpawnInterval = 0.4f;
+
+        wordFallSpeed += 9.0f;
     }
-
-    timer--;
-    frameCounter++;
 
     for(int i = 0; i < MAX_LIVES; i++) {
         if (i >= lives) {
@@ -216,17 +226,18 @@ void Game::updatePlay() {
 }
 
 void Game::resetGame() {
+    wordSpawnTimer = 0.0f;
+    difficultyTimer = 0.0f;
+    wordSpawnInterval = 2.0f;
+    wordFallSpeed = 80.0f;
+
     lives = MAX_LIVES;
     score = 0;
-    seconds = 0;
-    frameCounter = 0;
-    wordRate = 90;
     activeWords.clear();
     typedString.clear();
     for(int i = 0; i < MAX_LIVES; i++) {
         heartAnims[i].cur = heartAnims[i].first;
     }
-    resetTimer();
 }
 
 void Game::updatePause() {    
@@ -428,8 +439,4 @@ void Game::drawGameOver() {
              SCREEN_HEIGHT / 2 + (instructionSize * 4), 
              instructionSize, 
              LIGHTGRAY);
-}
-
-void Game::resetTimer() {
-    timer = wordRate;
 }

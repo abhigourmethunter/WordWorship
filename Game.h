@@ -14,14 +14,12 @@ public:
 
 private:
 
+    static constexpr float WORD_RATE_UPDATE_TIME = 10.0f;
     const int TEXT_SIZE = 50;
     const int TYPING_TEXT_SIZE = 35;
-    const int WORD_FALLING_SPEED = 2.75;
-    const int WORD_RATE_UPDATE_TIME = 8;
     const std::string HIGH_SCORE_FILE = "highscore.txt";
     static constexpr int MAX_LIVES = 5;
 
-    void resetTimer();
     void drawHome();
     void drawPlay();
     void drawPause();
@@ -47,18 +45,19 @@ private:
     } currentState = GameState::HOME;
 
     std::vector<Word> activeWords;
-    int timer;
     std::string typedString;
     int currentMatches;
     const int SCREEN_WIDTH;
     const int SCREEN_HEIGHT;
     int score = 0;
-    int seconds = 0;
-    int frameCounter = 0;
-    int wordRate = 90;
     int lives = MAX_LIVES;
     int highScore;
     bool matchesReduced = false;
+
+    float wordSpawnTimer = 0.0f;
+    float wordSpawnInterval = 2.0f;
+    float wordFallSpeed = 80.0f;
+    float difficultyTimer = 0.0f;
 
     Sound wordDestroyedSound;
     Sound mistakeSound;
