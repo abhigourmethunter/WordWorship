@@ -7,7 +7,7 @@ Word::Word(const std::string& t, float xpos, float ypos) : text(t), x(xpos), y(y
 }
 
 void Word::draw(int matchedChars, int textSize) const{
-    int gbComponent = 255 - (210* pow((y/GetScreenHeight()), 2.5));
+    int gbComponent = 255 - (220* pow((y/GetScreenHeight()), 2.5));
     Color textColor = {255, gbComponent, gbComponent, 255};
 
     if(isPotentialMatched) {

@@ -11,8 +11,15 @@ int main () {
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "TypingGame");
     SetTargetFPS(60);
 
+    InitAudioDevice();
+
     WordBank::loadWords();
     Game game = Game(SCREEN_WIDTH, SCREEN_HEIGHT);
+
+    if(!IsAudioDeviceReady()){
+        std::cerr << "Audio Device Not Ready!" << std::endl;
+        return -1;
+    }
 
     while (WindowShouldClose() == false){
 
@@ -25,7 +32,7 @@ int main () {
 
     }
 
-    game.~Game();
+    CloseAudioDevice();
 
     CloseWindow();
 

@@ -26,6 +26,10 @@ void Animation::update()
             case AnimationType::Once:
                 this->cur = this->last;
                 break;
+            case AnimationType::PingPong:
+                this->step = -this->step;
+                this->cur += this->step * 2;
+                break;
             }
         }
         else if (this->cur < this->first){
@@ -37,6 +41,10 @@ void Animation::update()
                 break;
             case AnimationType::Once:
                 this->cur = this->first;
+                break;
+            case AnimationType::PingPong:
+                this->step = -this->step;
+                this->cur += this->step * 2;
                 break;
             }
         }

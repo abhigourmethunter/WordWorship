@@ -6,6 +6,7 @@ public:
     enum class AnimationType {
         Loop,
         Once,
+        PingPong
     };
 
     int first;
