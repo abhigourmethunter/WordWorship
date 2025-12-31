@@ -95,7 +95,7 @@ void Game::loadAudios() {
     gameOverSound = LoadSound("assets/audio/sound_effects/game_over.wav");
     typingSound = LoadSound("assets/audio/sound_effects/typing.wav");
     mainMenuMusic = LoadMusicStream("assets/audio/music/menu_music.wav");
-    gameplayMusic = LoadMusicStream("assets/audio/music/blah.mp3");
+    gameplayMusic = LoadMusicStream("assets/audio/music/gameplay_music.wav");
 }
 
 void Game::unloadAudios() {
@@ -301,20 +301,19 @@ void Game::drawHome() {
     const char* part3 = "WOR";
     const char* part4 = "SHIP";
     
-    int titleSize = TEXT_SIZE;
-    int part1Width = MeasureText(part1, titleSize);
-    int part2Width = MeasureText(part2, titleSize);
-    int part3Width = MeasureText(part3, titleSize);
-    int part4Width = MeasureText(part4, titleSize);
+    int part1Width = MeasureText(part1, TITLE_SIZE);
+    int part2Width = MeasureText(part2, TITLE_SIZE);
+    int part3Width = MeasureText(part3, TITLE_SIZE);
+    int part4Width = MeasureText(part4, TITLE_SIZE);
     int totalWidth = part1Width + part2Width + part3Width + part4Width;
     
     int startX = (SCREEN_WIDTH - totalWidth) / 2;
-    int titleY = SCREEN_HEIGHT / 2 - (titleSize * 2);
+    int titleY = SCREEN_HEIGHT / 2 - (TITLE_SIZE * 2);
     
-    DrawText(part1, startX, titleY, titleSize, SKYBLUE);
-    DrawText(part2, startX + part1Width, titleY, titleSize, WHITE);
-    DrawText(part3, startX + part1Width + part2Width, titleY, titleSize, SKYBLUE);
-    DrawText(part4, startX + part1Width + part2Width + part3Width, titleY, titleSize, WHITE);
+    DrawText(part1, startX, titleY, TITLE_SIZE, SKYBLUE);
+    DrawText(part2, startX + part1Width, titleY, TITLE_SIZE, WHITE);
+    DrawText(part3, startX + part1Width + part2Width, titleY, TITLE_SIZE, SKYBLUE);
+    DrawText(part4, startX + part1Width + part2Width + part3Width, titleY, TITLE_SIZE, WHITE);
     
     int instructionSize = TEXT_SIZE / 2;
     const char* startText = "Press ENTER to Start";
@@ -336,26 +335,21 @@ void Game::drawHome() {
 void Game::drawPlay() {
     
     int typedTextWidth = MeasureText(typedString.c_str(), TEXT_SIZE);
-
     DrawRectangle(0, SCREEN_HEIGHT - TEXT_SIZE - 18, SCREEN_WIDTH, 3, RED);
     DrawRectangle(0, SCREEN_HEIGHT - TEXT_SIZE - 15, SCREEN_WIDTH, TEXT_SIZE + 15, GRAY);
     DrawText(typedString.c_str(), (SCREEN_WIDTH - typedTextWidth) / 2, SCREEN_HEIGHT - TEXT_SIZE - 5, TEXT_SIZE, GREEN);
     if (fmod(cursorBlinkTimer, 1.0f) < 0.5f) {
         DrawRectangle((SCREEN_WIDTH + typedTextWidth) / 2, SCREEN_HEIGHT - TEXT_SIZE - 5, 2, TEXT_SIZE, GREEN);
     }
-
     for (const Word& word : activeWords) {
         word.draw(typedString.length(), TEXT_SIZE);
     }
-
     const int BAR_HEIGHT = 40;
-    DrawRectangle(0, 0, SCREEN_WIDTH, BAR_HEIGHT, BLUE);
-    
-    std::string scoreText = "Score: " + std::to_string(score);
+    DrawRectangle(0, 0, SCREEN_WIDTH, BAR_HEIGHT, PURPLE);
+    Color scoreColor = {60, 30, 60, 255};    
+    int scoreSize = TEXT_SIZE - 15;
     std::string highScoreText = "High Score: " + std::to_string(highScore);
-    DrawText(scoreText.c_str(), 15, (BAR_HEIGHT - TEXT_SIZE + 10) / 2, TEXT_SIZE - 10, WHITE);
-    DrawText(highScoreText.c_str(), 15 + MeasureText(scoreText.c_str(), TEXT_SIZE), (BAR_HEIGHT - TEXT_SIZE + 10) / 2, TEXT_SIZE - 10, WHITE);
-
+    DrawText(highScoreText.c_str(), 15, (BAR_HEIGHT - scoreSize) / 2, scoreSize, scoreColor);
     const int HEART_SIZE = 30;
     const int HEART_SPACING = 5;
     for(int i = 0; i < MAX_LIVES; i++) {
@@ -365,6 +359,13 @@ void Game::drawPlay() {
                        {heartX, heartY, HEART_SIZE, HEART_SIZE}, 
                        {0, 0}, 0.0f, WHITE);
     }
+    std::string scoreText = "Score: " + std::to_string(score);
+    int highScoreTextWidth = MeasureText(highScoreText.c_str(), scoreSize);
+    int scoreTextWidth = MeasureText(scoreText.c_str(), scoreSize);
+    int leftEdge = 15 + highScoreTextWidth;
+    int rightEdge = SCREEN_WIDTH - (MAX_LIVES * (HEART_SIZE + HEART_SPACING)) - 10;
+    int centerX = (leftEdge + rightEdge) / 2 - scoreTextWidth / 2;
+    DrawText(scoreText.c_str(), centerX, (BAR_HEIGHT - scoreSize) / 2, scoreSize, scoreColor);
 }
 
 void Game::drawPause() {
@@ -406,24 +407,24 @@ void Game::drawGameOver() {
     const char* part1 = "GAME";
     const char* part2 = " OVER";
     
-    int part1Width = MeasureText(part1, TEXT_SIZE);
-    int part2Width = MeasureText(part2, TEXT_SIZE);
+    int part1Width = MeasureText(part1, TITLE_SIZE);
+    int part2Width = MeasureText(part2, TITLE_SIZE);
     int totalWidth = part1Width + part2Width;
     int startX = (SCREEN_WIDTH - totalWidth) / 2;
     
-    DrawText(part1, startX, titleY, TEXT_SIZE, SKYBLUE);
-    DrawText(part2, startX + part1Width, titleY, TEXT_SIZE, WHITE);
-    
-    std::string highScoreText = "High Score: " + std::to_string(highScore);
-    DrawText(highScoreText.c_str(), 
-             (SCREEN_WIDTH - MeasureText(highScoreText.c_str(), instructionSize)) / 2, 
-             SCREEN_HEIGHT / 2 - (TEXT_SIZE * 2), 
-             instructionSize, 
-             GOLD);
+    DrawText(part1, startX, titleY, TITLE_SIZE, SKYBLUE);
+    DrawText(part2, startX + part1Width, titleY, TITLE_SIZE, WHITE);
     
     std::string scoreText = "Your Score: " + std::to_string(score);
     DrawText(scoreText.c_str(), 
              (SCREEN_WIDTH - MeasureText(scoreText.c_str(), TEXT_SIZE)) / 2, 
+             SCREEN_HEIGHT / 2 - (TEXT_SIZE * 2), 
+             TEXT_SIZE, 
+             SKYBLUE);
+
+    std::string highScoreText = "High Score: " + std::to_string(highScore);
+    DrawText(highScoreText.c_str(), 
+             (SCREEN_WIDTH - MeasureText(highScoreText.c_str(), TEXT_SIZE)) / 2, 
              SCREEN_HEIGHT / 2 - TEXT_SIZE, 
              TEXT_SIZE, 
              SKYBLUE);

@@ -16,6 +16,7 @@ private:
 
     static constexpr float WORD_RATE_UPDATE_TIME = 10.0f;
     const int TEXT_SIZE = 50;
+    const int TITLE_SIZE = 70;
     const int TYPING_TEXT_SIZE = 35;
     const std::string HIGH_SCORE_FILE = "highscore.txt";
     static constexpr int MAX_LIVES = 5;
