@@ -1,4 +1,4 @@
 *.exe
 *.dsym
 main
-hiscore.txt
+highscore.txt
