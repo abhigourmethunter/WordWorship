@@ -25,6 +25,8 @@ private:
     void drawPlay();
     void drawPause();
     void drawGameOver();
+    void drawFlash();
+
     void loadAudios();
     void unloadAudios();
     
@@ -37,6 +39,8 @@ private:
     void saveHighScore();
 
     void resetGame();
+
+    void newHighScore();
 
     enum class GameState {
         HOME,
@@ -54,9 +58,12 @@ private:
     int lives = MAX_LIVES;
     int highScore;
     bool matchesReduced = false;
+    bool redFlash;
+    int redFlashCounter = 0;
+    int beat = 60;
 
     float wordSpawnTimer = 0.0f;
-    float wordSpawnInterval = 2.0f;
+    float wordSpawnInterval = 3.0f;
     float wordFallSpeed = 80.0f;
     float difficultyTimer = 0.0f;
 

@@ -8,7 +8,7 @@ int main () {
     const int SCREEN_WIDTH = 800;
     const int SCREEN_HEIGHT = 600;
 
-    InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "TypingGame");
+    InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Word Worship");
     SetTargetFPS(60);
 
     InitAudioDevice();
@@ -22,7 +22,6 @@ int main () {
     }
 
     while (WindowShouldClose() == false){
-
         game.update();
         
         BeginDrawing();

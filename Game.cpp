@@ -9,8 +9,10 @@ Game::Game(const int screen_width, const int screen_height)
       SCREEN_HEIGHT(screen_height),
       wordSpawnTimer(0.0f),
       difficultyTimer(0.0f),
-      wordSpawnInterval(2.0f),
-      wordFallSpeed(80.0f) {
+      wordSpawnInterval(3.0f),
+      wordFallSpeed(80.0f),
+      redFlashCounter(0),
+      redFlash(false) {
 
     heartTexture = LoadTexture("assets/art/Hearts/heart_animated_1.png");
 
@@ -121,7 +123,7 @@ void Game::updatePlay() {
 
     wordSpawnTimer += dt;
     if (wordSpawnTimer >= wordSpawnInterval) {
-        wordSpawnTimer -= wordSpawnInterval;
+        wordSpawnTimer = 0.0f;
 
         std::string newWord = WordBank::getRandomWord();
         activeWords.push_back(Word{newWord, (float)(rand() % (SCREEN_WIDTH - MeasureText(newWord.c_str(), TEXT_SIZE))), 0.0f});
@@ -155,6 +157,7 @@ void Game::updatePlay() {
                 score++;
                 PlaySound(wordDestroyedSound);
                 if (score > highScore){
+                    //NEW HIGH SCORE BUT ONLY ONCE
                     highScore = score;
                 }                
                 currentMatches--;
@@ -180,25 +183,37 @@ void Game::updatePlay() {
             if(lives <= 0) {
                 saveHighScore();
                 currentState = GameState::GAMEOVER;
+                beat = 60 / (MAX_LIVES - lives + 1);
                 StopMusicStream(gameplayMusic);
                 PlaySound(gameOverSound);
             }
             else{
                 PlaySound(lifeLostSound);
+                redFlash = false;
+                redFlashCounter = 60;
+                beat = 60 / (((MAX_LIVES - lives) * 2) - 1);
                 SetSoundPitch(lifeLostSound, 1.0f - (float(MAX_LIVES - lives) * 0.05f));
             }
         }
         else {
             ++it;
         }
+
+    }
+
+    if(redFlashCounter){
+        if(redFlashCounter % beat == 0){
+            redFlash = !redFlash;
+        }
+        redFlashCounter--;
     }
 
     if(currentMatches == 0) {
         typedString.clear();
         if(matchesReduced){
-            if(!IsSoundPlaying(mistakeSound)){
+            //if(!IsSoundPlaying(mistakeSound)){
                 PlaySound(mistakeSound);
-            }
+            //}
         }
     }
         
@@ -366,6 +381,10 @@ void Game::drawPlay() {
     int rightEdge = SCREEN_WIDTH - (MAX_LIVES * (HEART_SIZE + HEART_SPACING)) - 10;
     int centerX = (leftEdge + rightEdge) / 2 - scoreTextWidth / 2;
     DrawText(scoreText.c_str(), centerX, (BAR_HEIGHT - scoreSize) / 2, scoreSize, scoreColor);
+
+    if(redFlashCounter){
+        drawFlash();
+    }
 }
 
 void Game::drawPause() {
@@ -440,4 +459,14 @@ void Game::drawGameOver() {
              SCREEN_HEIGHT / 2 + (instructionSize * 4), 
              instructionSize, 
              LIGHTGRAY);
+}
+
+void Game::drawFlash() {
+    if(redFlash){
+        DrawRectangle(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, {255, 0, 0, 100});
+    }
+    else{
+        DrawRectangle(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, {255, 0, 0, 35});
+    }
+    //redFlashCounter--;
 }
