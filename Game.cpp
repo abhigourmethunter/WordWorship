@@ -3,10 +3,12 @@
 #include "WordBank.h"
 #include <cmath>
 #include <fstream>
+#include <iostream>
 
 Game::Game(const int screen_width, const int screen_height)
     : SCREEN_WIDTH(screen_width),
       SCREEN_HEIGHT(screen_height),
+      DIFFICULTY(Difficulty::MEDIUM),
       wordSpawnTimer(0.0f),
       difficultyTimer(0.0f),
       wordSpawnInterval(3.0f),
@@ -40,20 +42,48 @@ Game::~Game() {
 }
 
 void Game::loadHighScore() {
-    std::ifstream file(HIGH_SCORE_FILE);
-    if (file.is_open()) {
-        file >> highScore;
-        file.close();
-    } else {
-        highScore = 0;
+    bool flag = loadHighScores(highScores, HIGH_SCORE_FILE);
+    if(!flag){
+        std::cout << "failed to load highscores";
     }
 }
 
 void Game::saveHighScore() {
-    std::ofstream file(HIGH_SCORE_FILE);
-    if (file.is_open()) {
-        file << highScore;
-        file.close();
+    saveHighScores(highScores, HIGH_SCORE_FILE);
+}
+
+int Game::getHighScoreForDiffLevel(){
+    switch(DIFFICULTY){
+        case Difficulty::EASY:
+            return highScores.easy;
+        case Difficulty::MEDIUM:
+            return highScores.medium;
+        case Difficulty::HARD:
+            return highScores.hard;
+        case Difficulty::TEXPERT:
+            return highScores.texpert;
+        default:
+            return -1;
+    }
+    return -1;
+}
+
+void Game::setHighScoreForDiffLevel(int score){
+    switch(DIFFICULTY){
+        case Difficulty::EASY:
+            highScores.easy = score;
+            break;
+        case Difficulty::MEDIUM:
+            highScores.medium = score;
+            break;
+        case Difficulty::HARD:
+            highScores.hard = score;
+            break;
+        case Difficulty::TEXPERT:
+            highScores.texpert = score;
+            break;
+        default:
+            std::cout << "what da hael";
     }
 }
 
@@ -82,8 +112,61 @@ void Game::update() {
 }
 
 void Game::updateHome() {
+    int difficultySetter = DIFFICULTY + 1;
+
+    if(IsKeyPressed(KEY_ONE) || IsKeyPressed(KEY_KP_1)){
+        difficultySetter = 1;
+        PlaySound(clickSound);
+    }
+    else if(IsKeyPressed(KEY_TWO) || IsKeyPressed(KEY_KP_2)){
+        difficultySetter = 2;
+        PlaySound(clickSound);
+    }
+    else if(IsKeyPressed(KEY_THREE) || IsKeyPressed(KEY_KP_3)){
+        difficultySetter = 3;
+        PlaySound(clickSound);
+    }
+    else if(IsKeyPressed(KEY_FOUR) || IsKeyPressed(KEY_KP_4)){
+        difficultySetter = 4;
+        PlaySound(clickSound);
+    }
+    else if(IsKeyPressed(KEY_RIGHT)){
+        PlaySound(clickSound);
+        difficultySetter++;
+        if(difficultySetter > 4){
+            difficultySetter = 4;
+        }
+    }
+    else if(IsKeyPressed(KEY_LEFT)){
+        PlaySound(clickSound);
+        difficultySetter--;
+        if(difficultySetter < 1){
+            difficultySetter = 1;
+        }
+    }
+
+    switch(difficultySetter){
+        case 1:
+            DIFFICULTY = Difficulty::EASY;
+            break;
+        case 2:
+            DIFFICULTY = Difficulty::MEDIUM;
+            break;
+        case 3:
+            DIFFICULTY = Difficulty::HARD;
+            break;
+        case 4:
+            DIFFICULTY = Difficulty::TEXPERT;
+            break;
+        default:
+            DIFFICULTY = Difficulty::MEDIUM;
+            break;
+    }
+
     UpdateMusicStream(mainMenuMusic);
+
     if(IsKeyPressed(KEY_ENTER)) {
+        PlaySound(clickSound);
         currentState = GameState::PLAY;
         StopMusicStream(mainMenuMusic);
         PlayMusicStream(gameplayMusic);
@@ -91,6 +174,7 @@ void Game::updateHome() {
 }
 
 void Game::loadAudios() {
+    clickSound = LoadSound("assets/audio/sound_effects/click.wav");
     wordDestroyedSound = LoadSound("assets/audio/sound_effects/word_destroyed.wav");
     mistakeSound = LoadSound("assets/audio/sound_effects/mistake.wav");
     lifeLostSound = LoadSound("assets/audio/sound_effects/lose_life.wav");
@@ -116,6 +200,7 @@ void Game::updatePlay() {
     matchesReduced = false;
 
     if(IsKeyPressed(KEY_SPACE)) {
+        PlaySound(clickSound);
         currentState = GameState::PAUSE;
         SetMusicVolume(gameplayMusic, 0.2f);
         return;
@@ -125,7 +210,7 @@ void Game::updatePlay() {
     if (wordSpawnTimer >= wordSpawnInterval) {
         wordSpawnTimer = 0.0f;
 
-        std::string newWord = WordBank::getRandomWord();
+        std::string newWord = WordBank::getRandomWordWithDifficulty(DIFFICULTY);
         activeWords.push_back(Word{newWord, (float)(rand() % (SCREEN_WIDTH - MeasureText(newWord.c_str(), TEXT_SIZE))), 0.0f});
     }
     
@@ -156,9 +241,9 @@ void Game::updatePlay() {
                 it = activeWords.erase(it);
                 score++;
                 PlaySound(wordDestroyedSound);
-                if (score > highScore){
+                if (score > getHighScoreForDiffLevel()){
                     //NEW HIGH SCORE BUT ONLY ONCE
-                    highScore = score;
+                    setHighScoreForDiffLevel(score);
                 }                
                 currentMatches--;
                 continue;
@@ -211,9 +296,9 @@ void Game::updatePlay() {
     if(currentMatches == 0) {
         typedString.clear();
         if(matchesReduced){
-            //if(!IsSoundPlaying(mistakeSound)){
+            if(!IsSoundPlaying(mistakeSound)){
                 PlaySound(mistakeSound);
-            //}
+            }
         }
     }
         
@@ -243,7 +328,7 @@ void Game::updatePlay() {
 void Game::resetGame() {
     wordSpawnTimer = 0.0f;
     difficultyTimer = 0.0f;
-    wordSpawnInterval = 2.0f;
+    wordSpawnInterval = 2.5f;
     wordFallSpeed = 80.0f;
 
     lives = MAX_LIVES;
@@ -259,12 +344,23 @@ void Game::updatePause() {
     UpdateMusicStream(gameplayMusic);
 
     if(IsKeyPressed(KEY_TAB)) {
+        PlaySound(clickSound);
         currentState = GameState::HOME;
+        SetMusicVolume(gameplayMusic, 1.0f);
         StopMusicStream(gameplayMusic);
         PlayMusicStream(mainMenuMusic);
         resetGame();
     }
+    if(IsKeyPressed(KEY_ENTER)) {
+        PlaySound(clickSound);
+        currentState = GameState::PLAY;
+        SetMusicVolume(gameplayMusic, 1.0f);
+        StopMusicStream(gameplayMusic);
+        PlayMusicStream(gameplayMusic);
+        resetGame();
+    }
     if(IsKeyPressed(KEY_SPACE)) {
+        PlaySound(clickSound);
         currentState = GameState::PLAY;      
         SetMusicVolume(gameplayMusic, 1.0f);  
     }
@@ -272,15 +368,15 @@ void Game::updatePause() {
 
 void Game::updateGameOver() {
     if(IsKeyPressed(KEY_ENTER)) {
+        PlaySound(clickSound);
         currentState = GameState::PLAY;
-        SetMusicVolume(gameplayMusic, 1.0f);
         PlayMusicStream(gameplayMusic);
         resetGame();
     }
 
     if(IsKeyPressed(KEY_TAB)) {
+        PlaySound(clickSound);
         currentState = GameState::HOME;
-        SetMusicVolume(mainMenuMusic, 1.0f);
         PlayMusicStream(mainMenuMusic);
         resetGame();
     }
@@ -323,28 +419,66 @@ void Game::drawHome() {
     int totalWidth = part1Width + part2Width + part3Width + part4Width;
     
     int startX = (SCREEN_WIDTH - totalWidth) / 2;
-    int titleY = SCREEN_HEIGHT / 2 - (TITLE_SIZE * 2);
+    int titleY = SCREEN_HEIGHT / 2 - (TITLE_SIZE * 3);
+    int letterSpacing = findLetterSpacing(TITLE_SIZE);
     
     DrawText(part1, startX, titleY, TITLE_SIZE, SKYBLUE);
-    DrawText(part2, startX + part1Width, titleY, TITLE_SIZE, WHITE);
-    DrawText(part3, startX + part1Width + part2Width, titleY, TITLE_SIZE, SKYBLUE);
-    DrawText(part4, startX + part1Width + part2Width + part3Width, titleY, TITLE_SIZE, WHITE);
+    DrawText(part2, startX + part1Width + letterSpacing, titleY, TITLE_SIZE, WHITE);
+    DrawText(part3, startX + part1Width + part2Width + (letterSpacing * 2), titleY, TITLE_SIZE + 1, SKYBLUE);
+    DrawText(part4, startX + part1Width + part2Width + part3Width + (letterSpacing * 3), titleY, TITLE_SIZE, WHITE);
     
     int instructionSize = TEXT_SIZE / 2;
-    const char* startText = "Press ENTER to Start";
-    const char* exitText = "Press ESC to Exit";
+    const char* startText = "Press  [ENTER]  to Start";
+    const char* exitText = "Press  [ESC]  to Exit";
     
     DrawText(startText, 
              (SCREEN_WIDTH - MeasureText(startText, instructionSize)) / 2, 
-             SCREEN_HEIGHT / 2 + instructionSize, 
+             titleY + TITLE_SIZE + (instructionSize * 2), 
              instructionSize, 
              LIGHTGRAY);
     
     DrawText(exitText, 
              (SCREEN_WIDTH - MeasureText(exitText, instructionSize)) / 2, 
-             SCREEN_HEIGHT / 2 + (instructionSize * 3), 
+             titleY + TITLE_SIZE + (instructionSize * 3.5), 
              instructionSize, 
              LIGHTGRAY);
+    Difficulty currentDifficulty = DIFFICULTY;
+    
+    const char* difficultyLabel = "Select Difficulty:";
+    const char* difficulties[] = {"Easy (1)", "Medium (2)", "Hard (3)", "Texpert (4)"};
+    
+    int bottomY = SCREEN_HEIGHT - (instructionSize * 7);
+    int difficultyLabelSize = instructionSize*1.25;
+
+    DrawText(difficultyLabel, 
+             (SCREEN_WIDTH - MeasureText(difficultyLabel, difficultyLabelSize)) / 2, 
+             bottomY - instructionSize * 2, 
+             difficultyLabelSize, 
+             LIGHTGRAY);
+    
+    int spacing = 40;
+    int totalDiffWidth = 0;
+    for (int i = 0; i < 4; i++) {
+        totalDiffWidth += MeasureText(difficulties[i], instructionSize);
+    }
+    totalDiffWidth += spacing * 3;
+    
+    int startDiffX = (SCREEN_WIDTH - totalDiffWidth) / 2;
+    int currentX = startDiffX;
+    
+    for (int i = 0; i < 4; i++) {
+        Color color = (currentDifficulty == i) ? WHITE : GRAY;
+        DrawText(difficulties[i], currentX, bottomY, instructionSize, color);
+        currentX += MeasureText(difficulties[i], instructionSize) + spacing;
+    }
+
+    int highScore = getHighScoreForDiffLevel();
+    std::string highScoreText = "High Score: " + std::to_string(highScore);
+    DrawText(highScoreText.c_str(),
+             (SCREEN_WIDTH - MeasureText(highScoreText.c_str(), instructionSize)) / 2,
+             bottomY + instructionSize * 3,
+             instructionSize,
+             GOLD);
 }
 
 void Game::drawPlay() {
@@ -363,7 +497,7 @@ void Game::drawPlay() {
     DrawRectangle(0, 0, SCREEN_WIDTH, BAR_HEIGHT, PURPLE);
     Color scoreColor = {60, 30, 60, 255};    
     int scoreSize = TEXT_SIZE - 15;
-    std::string highScoreText = "High Score: " + std::to_string(highScore);
+    std::string highScoreText = "High Score: " + std::to_string(getHighScoreForDiffLevel());
     DrawText(highScoreText.c_str(), 15, (BAR_HEIGHT - scoreSize) / 2, scoreSize, scoreColor);
     const int HEART_SIZE = 30;
     const int HEART_SPACING = 5;
@@ -398,65 +532,91 @@ void Game::drawPause() {
     const char* part1 = "PAU";
     const char* part2 = "SED";
     
-    int part1Width = MeasureText(part1, TEXT_SIZE);
-    int part2Width = MeasureText(part2, TEXT_SIZE);
+    int part1Width = MeasureText(part1, TITLE_SIZE);
+    int part2Width = MeasureText(part2, TITLE_SIZE);
     int totalWidth = part1Width + part2Width;
     int startX = (SCREEN_WIDTH - totalWidth) / 2;
     
-    DrawText(part1, startX, titleY, TEXT_SIZE, SKYBLUE);
-    DrawText(part2, startX + part1Width, titleY, TEXT_SIZE, WHITE);
-    
-    DrawText("Press SPACE to Resume", 
-             (SCREEN_WIDTH - MeasureText("Press SPACE to Resume", instructionSize)) / 2, 
-             SCREEN_HEIGHT / 2 + instructionSize, 
+    int letterSpacing = findLetterSpacing(TITLE_SIZE);
+    DrawText(part1, startX, titleY, TITLE_SIZE, SKYBLUE);
+    DrawText(part2, startX + part1Width + letterSpacing, titleY, TITLE_SIZE, WHITE);
+
+    std::string scoreText = "Score: " + std::to_string(score);
+    DrawText(scoreText.c_str(), 
+             (SCREEN_WIDTH - MeasureText(scoreText.c_str(), instructionSize)) / 2, 
+             titleY + TITLE_SIZE + instructionSize, 
+             instructionSize, 
+             WHITE);
+
+    std::string highScoreText = "High Score: " + std::to_string(getHighScoreForDiffLevel());
+    DrawText(highScoreText.c_str(), 
+             (SCREEN_WIDTH - MeasureText(highScoreText.c_str(), instructionSize)) / 2, 
+             titleY + TITLE_SIZE + (instructionSize * 2.5), 
+             instructionSize, 
+             GOLD);
+
+    DrawText("Press  [SPACE]  to Resume",
+             (SCREEN_WIDTH - MeasureText("Press [SPACE] to Resume", instructionSize)) / 2, 
+             SCREEN_HEIGHT / 2 + (instructionSize * 2), 
              instructionSize, 
              LIGHTGRAY);
     
-    DrawText("Press TAB for Home Menu", 
-             (SCREEN_WIDTH - MeasureText("Press TAB for Home Menu", instructionSize)) / 2, 
-             SCREEN_HEIGHT / 2 + (instructionSize * 3), 
+    DrawText("Press  [TAB]  for Home Menu", 
+             (SCREEN_WIDTH - MeasureText("Press [TAB] for Home Menu", instructionSize)) / 2, 
+             SCREEN_HEIGHT / 2 + (instructionSize * 3.5), 
+             instructionSize, 
+             LIGHTGRAY);
+    
+    DrawText("Press  [ENTER]  to Restart", 
+             (SCREEN_WIDTH - MeasureText("Press  [ENTER]  to Restart", instructionSize)) / 2, 
+             SCREEN_HEIGHT / 2 + (instructionSize * 5), 
              instructionSize, 
              LIGHTGRAY);
 }
 
 void Game::drawGameOver() {
     int instructionSize = TEXT_SIZE / 2;
-    int titleY = SCREEN_HEIGHT / 2 - (TEXT_SIZE * 4);
+    int titleY = SCREEN_HEIGHT / 2 - (TEXT_SIZE * 3.5);
     
-    const char* part1 = "GAME";
-    const char* part2 = " OVER";
+    const char* part1 = "GAM";
+    const char* part2 = "E O";
+    const char* part3 = "VER";
     
     int part1Width = MeasureText(part1, TITLE_SIZE);
     int part2Width = MeasureText(part2, TITLE_SIZE);
-    int totalWidth = part1Width + part2Width;
+    int part3Width = MeasureText(part3, TITLE_SIZE);
+    int totalWidth = part1Width + part2Width + part3Width;
     int startX = (SCREEN_WIDTH - totalWidth) / 2;
     
+    int letterSpacing = findLetterSpacing(TITLE_SIZE);
+    
     DrawText(part1, startX, titleY, TITLE_SIZE, SKYBLUE);
-    DrawText(part2, startX + part1Width, titleY, TITLE_SIZE, WHITE);
+    DrawText(part2, startX + part1Width + letterSpacing, titleY, TITLE_SIZE, WHITE);
+    DrawText(part3, startX + part1Width + part2Width + (letterSpacing * 2), titleY, TITLE_SIZE, {255, 0, 0, 255});
     
-    std::string scoreText = "Your Score: " + std::to_string(score);
+    std::string scoreText = "Score: " + std::to_string(score);
     DrawText(scoreText.c_str(), 
-             (SCREEN_WIDTH - MeasureText(scoreText.c_str(), TEXT_SIZE)) / 2, 
-             SCREEN_HEIGHT / 2 - (TEXT_SIZE * 2), 
-             TEXT_SIZE, 
-             SKYBLUE);
+             (SCREEN_WIDTH - MeasureText(scoreText.c_str(), instructionSize)) / 2, 
+             titleY + TITLE_SIZE + (instructionSize * 1.5), 
+             instructionSize, 
+             WHITE);
 
-    std::string highScoreText = "High Score: " + std::to_string(highScore);
+    std::string highScoreText = "High Score: " + std::to_string(getHighScoreForDiffLevel());
     DrawText(highScoreText.c_str(), 
-             (SCREEN_WIDTH - MeasureText(highScoreText.c_str(), TEXT_SIZE)) / 2, 
-             SCREEN_HEIGHT / 2 - TEXT_SIZE, 
-             TEXT_SIZE, 
-             SKYBLUE);
-    
-    DrawText("Press ENTER to Restart", 
-             (SCREEN_WIDTH - MeasureText("Press ENTER to Restart", instructionSize)) / 2, 
+             (SCREEN_WIDTH - MeasureText(highScoreText.c_str(), instructionSize)) / 2, 
+             titleY + TITLE_SIZE + (instructionSize * 3), 
+             instructionSize, 
+             GOLD);
+
+    DrawText("Press  [ENTER]  to Restart", 
+             (SCREEN_WIDTH - MeasureText("Press  [ENTER]  to Restart", instructionSize)) / 2, 
              SCREEN_HEIGHT / 2 + (instructionSize * 2), 
              instructionSize, 
              LIGHTGRAY);
     
-    DrawText("Press TAB for Home Menu", 
-             (SCREEN_WIDTH - MeasureText("Press TAB for Home Menu", instructionSize)) / 2, 
-             SCREEN_HEIGHT / 2 + (instructionSize * 4), 
+    DrawText("Press  [TAB]  for Home Menu", 
+             (SCREEN_WIDTH - MeasureText("Press  [TAB]  for Home Menu", instructionSize)) / 2, 
+             SCREEN_HEIGHT / 2 + (instructionSize * 3.5), 
              instructionSize, 
              LIGHTGRAY);
 }
@@ -468,5 +628,8 @@ void Game::drawFlash() {
     else{
         DrawRectangle(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, {255, 0, 0, 35});
     }
-    //redFlashCounter--;
+}
+
+int Game::findLetterSpacing(int fontSize){
+    return MeasureText("AB", fontSize) - (MeasureText("A", fontSize) + MeasureText("B", fontSize));
 }

@@ -1,0 +1,9 @@
+things to add to WordWorship:
+
+- Display highscores on homepage for each difficulty level
+
+- improve overall design
+
+- Audio controls (music and sfx volume)
+
+- zen mode

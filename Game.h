@@ -4,6 +4,8 @@
 #include <vector>
 #include <string>
 #include <raylib.h>
+#include "Difficulty.h"
+#include "SaveData.h"
 
 class Game {
 public:
@@ -13,13 +15,17 @@ public:
     void draw();
 
 private:
+    SaveData highScores;
 
+    Difficulty DIFFICULTY = Difficulty::MEDIUM;
     static constexpr float WORD_RATE_UPDATE_TIME = 10.0f;
     const int TEXT_SIZE = 50;
     const int TITLE_SIZE = 70;
     const int TYPING_TEXT_SIZE = 35;
-    const std::string HIGH_SCORE_FILE = "highscore.txt";
+    const std::string HIGH_SCORE_FILE = "highscore.dat";
     static constexpr int MAX_LIVES = 5;
+
+    int findLetterSpacing(int fontSize);
 
     void drawHome();
     void drawPlay();
@@ -35,6 +41,8 @@ private:
     void updatePause();
     void updateGameOver();
 
+    int getHighScoreForDiffLevel();
+    void setHighScoreForDiffLevel(int score);
     void loadHighScore();
     void saveHighScore();
 
@@ -56,14 +64,13 @@ private:
     const int SCREEN_HEIGHT;
     int score = 0;
     int lives = MAX_LIVES;
-    int highScore;
     bool matchesReduced = false;
     bool redFlash;
     int redFlashCounter = 0;
     int beat = 60;
 
     float wordSpawnTimer = 0.0f;
-    float wordSpawnInterval = 3.0f;
+    float wordSpawnInterval = 2.5f;
     float wordFallSpeed = 80.0f;
     float difficultyTimer = 0.0f;
 
@@ -72,6 +79,7 @@ private:
     Sound lifeLostSound;
     Sound gameOverSound;
     Sound typingSound;
+    Sound clickSound;
     Music mainMenuMusic;
     Music gameplayMusic;
 
