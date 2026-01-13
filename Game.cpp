@@ -427,39 +427,38 @@ void Game::drawHome() {
     DrawText(part3, startX + part1Width + part2Width + (letterSpacing * 2), titleY, TITLE_SIZE + 1, SKYBLUE);
     DrawText(part4, startX + part1Width + part2Width + part3Width + (letterSpacing * 3), titleY, TITLE_SIZE, WHITE);
     
-    int instructionSize = TEXT_SIZE / 2;
     const char* startText = "Press  [ENTER]  to Start";
     const char* exitText = "Press  [ESC]  to Exit";
     
     DrawText(startText, 
-             (SCREEN_WIDTH - MeasureText(startText, instructionSize)) / 2, 
-             titleY + TITLE_SIZE + (instructionSize * 2), 
-             instructionSize, 
+             (SCREEN_WIDTH - MeasureText(startText, INSTRUCTION_SIZE)) / 2, 
+             titleY + TITLE_SIZE + (INSTRUCTION_SIZE * 2), 
+             INSTRUCTION_SIZE, 
              LIGHTGRAY);
     
     DrawText(exitText, 
-             (SCREEN_WIDTH - MeasureText(exitText, instructionSize)) / 2, 
-             titleY + TITLE_SIZE + (instructionSize * 3.5), 
-             instructionSize, 
+             (SCREEN_WIDTH - MeasureText(exitText, INSTRUCTION_SIZE)) / 2, 
+             titleY + TITLE_SIZE + (INSTRUCTION_SIZE * 3.5), 
+             INSTRUCTION_SIZE, 
              LIGHTGRAY);
     Difficulty currentDifficulty = DIFFICULTY;
     
     const char* difficultyLabel = "Select Difficulty:";
     const char* difficulties[] = {"Easy (1)", "Medium (2)", "Hard (3)", "Texpert (4)"};
     
-    int bottomY = SCREEN_HEIGHT - (instructionSize * 7);
-    int difficultyLabelSize = instructionSize*1.25;
+    int bottomY = SCREEN_HEIGHT - (INSTRUCTION_SIZE * 7);
+    int difficultyLabelSize = INSTRUCTION_SIZE*1.25;
 
     DrawText(difficultyLabel, 
              (SCREEN_WIDTH - MeasureText(difficultyLabel, difficultyLabelSize)) / 2, 
-             bottomY - instructionSize * 2, 
+             bottomY - INSTRUCTION_SIZE * 2, 
              difficultyLabelSize, 
              LIGHTGRAY);
     
     int spacing = 40;
     int totalDiffWidth = 0;
     for (int i = 0; i < 4; i++) {
-        totalDiffWidth += MeasureText(difficulties[i], instructionSize);
+        totalDiffWidth += MeasureText(difficulties[i], INSTRUCTION_SIZE);
     }
     totalDiffWidth += spacing * 3;
     
@@ -468,27 +467,34 @@ void Game::drawHome() {
     
     for (int i = 0; i < 4; i++) {
         Color color = (currentDifficulty == i) ? WHITE : GRAY;
-        DrawText(difficulties[i], currentX, bottomY, instructionSize, color);
-        currentX += MeasureText(difficulties[i], instructionSize) + spacing;
+        DrawText(difficulties[i], currentX, bottomY, INSTRUCTION_SIZE, color);
+        currentX += MeasureText(difficulties[i], INSTRUCTION_SIZE) + spacing;
     }
 
     int highScore = getHighScoreForDiffLevel();
     std::string highScoreText = "High Score: " + std::to_string(highScore);
     DrawText(highScoreText.c_str(),
-             (SCREEN_WIDTH - MeasureText(highScoreText.c_str(), instructionSize)) / 2,
-             bottomY + instructionSize * 3,
-             instructionSize,
+             (SCREEN_WIDTH - MeasureText(highScoreText.c_str(), INSTRUCTION_SIZE)) / 2,
+             bottomY + INSTRUCTION_SIZE * 3,
+             INSTRUCTION_SIZE,
              GOLD);
 }
 
 void Game::drawPlay() {
+
+    std::string pauseText = "[SPACE] to pause";
+    DrawText(pauseText.c_str(),
+             (SCREEN_WIDTH - MeasureText(pauseText.c_str(), (INSTRUCTION_SIZE * 1.25))) / 2,
+             (SCREEN_HEIGHT/2) - (INSTRUCTION_SIZE * 1.25),
+             (INSTRUCTION_SIZE * 1.25),
+             {200, 200, 200, 70});
     
     int typedTextWidth = MeasureText(typedString.c_str(), TEXT_SIZE);
     DrawRectangle(0, SCREEN_HEIGHT - TEXT_SIZE - 18, SCREEN_WIDTH, 3, RED);
     DrawRectangle(0, SCREEN_HEIGHT - TEXT_SIZE - 15, SCREEN_WIDTH, TEXT_SIZE + 15, GRAY);
-    DrawText(typedString.c_str(), (SCREEN_WIDTH - typedTextWidth) / 2, SCREEN_HEIGHT - TEXT_SIZE - 5, TEXT_SIZE, GREEN);
+    DrawText(typedString.c_str(), (SCREEN_WIDTH - typedTextWidth) / 2, SCREEN_HEIGHT - TEXT_SIZE - 5, TEXT_SIZE, typedStringCOlor);
     if (fmod(cursorBlinkTimer, 1.0f) < 0.5f) {
-        DrawRectangle((SCREEN_WIDTH + typedTextWidth) / 2, SCREEN_HEIGHT - TEXT_SIZE - 5, 2, TEXT_SIZE, GREEN);
+        DrawRectangle((SCREEN_WIDTH + typedTextWidth) / 2, SCREEN_HEIGHT - TEXT_SIZE - 5, 2, TEXT_SIZE, typedStringCOlor);
     }
     for (const Word& word : activeWords) {
         word.draw(typedString.length(), TEXT_SIZE);
@@ -526,7 +532,6 @@ void Game::drawPause() {
     
     DrawRectangle(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, Fade(BLACK, 0.9f));
     
-    int instructionSize = TEXT_SIZE / 2;
     int titleY = SCREEN_HEIGHT / 2 - (TEXT_SIZE * 3);
     
     const char* part1 = "PAU";
@@ -543,39 +548,38 @@ void Game::drawPause() {
 
     std::string scoreText = "Score: " + std::to_string(score);
     DrawText(scoreText.c_str(), 
-             (SCREEN_WIDTH - MeasureText(scoreText.c_str(), instructionSize)) / 2, 
-             titleY + TITLE_SIZE + instructionSize, 
-             instructionSize, 
+             (SCREEN_WIDTH - MeasureText(scoreText.c_str(), INSTRUCTION_SIZE)) / 2, 
+             titleY + TITLE_SIZE + INSTRUCTION_SIZE, 
+             INSTRUCTION_SIZE, 
              WHITE);
 
     std::string highScoreText = "High Score: " + std::to_string(getHighScoreForDiffLevel());
     DrawText(highScoreText.c_str(), 
-             (SCREEN_WIDTH - MeasureText(highScoreText.c_str(), instructionSize)) / 2, 
-             titleY + TITLE_SIZE + (instructionSize * 2.5), 
-             instructionSize, 
+             (SCREEN_WIDTH - MeasureText(highScoreText.c_str(), INSTRUCTION_SIZE)) / 2, 
+             titleY + TITLE_SIZE + (INSTRUCTION_SIZE * 2.5), 
+             INSTRUCTION_SIZE, 
              GOLD);
 
     DrawText("Press  [SPACE]  to Resume",
-             (SCREEN_WIDTH - MeasureText("Press [SPACE] to Resume", instructionSize)) / 2, 
-             SCREEN_HEIGHT / 2 + (instructionSize * 2), 
-             instructionSize, 
+             (SCREEN_WIDTH - MeasureText("Press [SPACE] to Resume", INSTRUCTION_SIZE)) / 2, 
+             SCREEN_HEIGHT / 2 + (INSTRUCTION_SIZE * 2), 
+             INSTRUCTION_SIZE, 
              LIGHTGRAY);
     
     DrawText("Press  [TAB]  for Home Menu", 
-             (SCREEN_WIDTH - MeasureText("Press [TAB] for Home Menu", instructionSize)) / 2, 
-             SCREEN_HEIGHT / 2 + (instructionSize * 3.5), 
-             instructionSize, 
+             (SCREEN_WIDTH - MeasureText("Press [TAB] for Home Menu", INSTRUCTION_SIZE)) / 2, 
+             SCREEN_HEIGHT / 2 + (INSTRUCTION_SIZE * 3.5), 
+             INSTRUCTION_SIZE, 
              LIGHTGRAY);
     
     DrawText("Press  [ENTER]  to Restart", 
-             (SCREEN_WIDTH - MeasureText("Press  [ENTER]  to Restart", instructionSize)) / 2, 
-             SCREEN_HEIGHT / 2 + (instructionSize * 5), 
-             instructionSize, 
+             (SCREEN_WIDTH - MeasureText("Press  [ENTER]  to Restart", INSTRUCTION_SIZE)) / 2, 
+             SCREEN_HEIGHT / 2 + (INSTRUCTION_SIZE * 5), 
+             INSTRUCTION_SIZE, 
              LIGHTGRAY);
 }
 
 void Game::drawGameOver() {
-    int instructionSize = TEXT_SIZE / 2;
     int titleY = SCREEN_HEIGHT / 2 - (TEXT_SIZE * 3.5);
     
     const char* part1 = "GAM";
@@ -596,28 +600,28 @@ void Game::drawGameOver() {
     
     std::string scoreText = "Score: " + std::to_string(score);
     DrawText(scoreText.c_str(), 
-             (SCREEN_WIDTH - MeasureText(scoreText.c_str(), instructionSize)) / 2, 
-             titleY + TITLE_SIZE + (instructionSize * 1.5), 
-             instructionSize, 
+             (SCREEN_WIDTH - MeasureText(scoreText.c_str(), INSTRUCTION_SIZE)) / 2, 
+             titleY + TITLE_SIZE + (INSTRUCTION_SIZE * 1.5), 
+             INSTRUCTION_SIZE, 
              WHITE);
 
     std::string highScoreText = "High Score: " + std::to_string(getHighScoreForDiffLevel());
     DrawText(highScoreText.c_str(), 
-             (SCREEN_WIDTH - MeasureText(highScoreText.c_str(), instructionSize)) / 2, 
-             titleY + TITLE_SIZE + (instructionSize * 3), 
-             instructionSize, 
+             (SCREEN_WIDTH - MeasureText(highScoreText.c_str(), INSTRUCTION_SIZE)) / 2, 
+             titleY + TITLE_SIZE + (INSTRUCTION_SIZE * 3), 
+             INSTRUCTION_SIZE, 
              GOLD);
 
     DrawText("Press  [ENTER]  to Restart", 
-             (SCREEN_WIDTH - MeasureText("Press  [ENTER]  to Restart", instructionSize)) / 2, 
-             SCREEN_HEIGHT / 2 + (instructionSize * 2), 
-             instructionSize, 
+             (SCREEN_WIDTH - MeasureText("Press  [ENTER]  to Restart", INSTRUCTION_SIZE)) / 2, 
+             SCREEN_HEIGHT / 2 + (INSTRUCTION_SIZE * 2), 
+             INSTRUCTION_SIZE, 
              LIGHTGRAY);
     
     DrawText("Press  [TAB]  for Home Menu", 
-             (SCREEN_WIDTH - MeasureText("Press  [TAB]  for Home Menu", instructionSize)) / 2, 
-             SCREEN_HEIGHT / 2 + (instructionSize * 3.5), 
-             instructionSize, 
+             (SCREEN_WIDTH - MeasureText("Press  [TAB]  for Home Menu", INSTRUCTION_SIZE)) / 2, 
+             SCREEN_HEIGHT / 2 + (INSTRUCTION_SIZE * 3.5), 
+             INSTRUCTION_SIZE, 
              LIGHTGRAY);
 }
 

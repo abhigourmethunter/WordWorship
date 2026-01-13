@@ -21,6 +21,7 @@ private:
     static constexpr float WORD_RATE_UPDATE_TIME = 10.0f;
     const int TEXT_SIZE = 50;
     const int TITLE_SIZE = 70;
+    const int INSTRUCTION_SIZE = TEXT_SIZE / 2;
     const int TYPING_TEXT_SIZE = 35;
     const std::string HIGH_SCORE_FILE = "highscore.dat";
     static constexpr int MAX_LIVES = 5;
@@ -73,6 +74,8 @@ private:
     float wordSpawnInterval = 2.5f;
     float wordFallSpeed = 80.0f;
     float difficultyTimer = 0.0f;
+
+    const Color typedStringCOlor = {50, 245, 0, 255};
 
     Sound wordDestroyedSound;
     Sound mistakeSound;
