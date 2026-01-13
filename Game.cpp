@@ -484,9 +484,9 @@ void Game::drawPlay() {
 
     std::string pauseText = "[SPACE] to pause";
     DrawText(pauseText.c_str(),
-             (SCREEN_WIDTH - MeasureText(pauseText.c_str(), (INSTRUCTION_SIZE * 1.25))) / 2,
-             (SCREEN_HEIGHT/2) - (INSTRUCTION_SIZE * 1.25),
-             (INSTRUCTION_SIZE * 1.25),
+             (SCREEN_WIDTH - MeasureText(pauseText.c_str(), (INSTRUCTION_SIZE * 1.15))) / 2,
+             (SCREEN_HEIGHT/2) - (INSTRUCTION_SIZE * 1.15),
+             (INSTRUCTION_SIZE * 1.15),
              {200, 200, 200, 70});
     
     int typedTextWidth = MeasureText(typedString.c_str(), TEXT_SIZE);
@@ -582,9 +582,9 @@ void Game::drawPause() {
 void Game::drawGameOver() {
     int titleY = SCREEN_HEIGHT / 2 - (TEXT_SIZE * 3.5);
     
-    const char* part1 = "GAM";
-    const char* part2 = "E O";
-    const char* part3 = "VER";
+    const char* part1 = "GA";
+    const char* part2 = "ME ";
+    const char* part3 = "OVER";
     
     int part1Width = MeasureText(part1, TITLE_SIZE);
     int part2Width = MeasureText(part2, TITLE_SIZE);
