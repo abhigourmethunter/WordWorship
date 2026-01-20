@@ -20,14 +20,19 @@ private:
     Difficulty DIFFICULTY = Difficulty::MEDIUM;
     static constexpr float WORD_RATE_UPDATE_TIME = 10.0f;
     const int TEXT_SIZE = 50;
+    const int SCORE_SIZE = 35;
     const int TITLE_SIZE = 70;
     const int INSTRUCTION_SIZE = TEXT_SIZE / 2;
     const int TYPING_TEXT_SIZE = 35;
     const std::string HIGH_SCORE_FILE = "highscore.dat";
     static constexpr int MAX_LIVES = 5;
+    float multiplierForNewHighscore = 1.0f;
+    float highScoreTimer = 0.0f;
+    float highScoreDuration = 2.0f;
+    bool newHighScoreFlag = false;
 
     int findLetterSpacing(int fontSize);
-
+    
     void drawHome();
     void drawPlay();
     void drawPause();
@@ -83,6 +88,7 @@ private:
     Sound gameOverSound;
     Sound typingSound;
     Sound clickSound;
+    Sound newHighScoreSound;
     Music mainMenuMusic;
     Music gameplayMusic;
 

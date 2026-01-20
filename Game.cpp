@@ -182,6 +182,7 @@ void Game::loadAudios() {
     typingSound = LoadSound("assets/audio/sound_effects/typing.wav");
     mainMenuMusic = LoadMusicStream("assets/audio/music/menu_music.wav");
     gameplayMusic = LoadMusicStream("assets/audio/music/gameplay_music.wav");
+    newHighScoreSound = LoadSound("assets/audio/sound_effects/new_highscore.wav");
 }
 
 void Game::unloadAudios() {
@@ -242,7 +243,11 @@ void Game::updatePlay() {
                 score++;
                 PlaySound(wordDestroyedSound);
                 if (score > getHighScoreForDiffLevel()){
-                    //NEW HIGH SCORE BUT ONLY ONCE
+                    if(!newHighScoreFlag){
+                        newHighScoreFlag = true;
+                        PlaySound(newHighScoreSound);
+                        highScoreTimer = highScoreDuration;
+                    }
                     setHighScoreForDiffLevel(score);
                 }                
                 currentMatches--;
@@ -293,6 +298,15 @@ void Game::updatePlay() {
         redFlashCounter--;
     }
 
+    if(highScoreTimer > 0) {
+        newHighScore();
+        highScoreTimer -= dt;
+        
+        if(highScoreTimer <= 0) {
+            multiplierForNewHighscore = 1.0f;
+        }
+    }
+
     if(currentMatches == 0) {
         typedString.clear();
         if(matchesReduced){
@@ -338,6 +352,9 @@ void Game::resetGame() {
     for(int i = 0; i < MAX_LIVES; i++) {
         heartAnims[i].cur = heartAnims[i].first;
     }
+    newHighScoreFlag = false;
+    highScoreTimer = 0.0f;
+    multiplierForNewHighscore = 1.0f;
 }
 
 void Game::updatePause() {    
@@ -345,6 +362,7 @@ void Game::updatePause() {
 
     if(IsKeyPressed(KEY_TAB)) {
         PlaySound(clickSound);
+        saveHighScore();
         currentState = GameState::HOME;
         SetMusicVolume(gameplayMusic, 1.0f);
         StopMusicStream(gameplayMusic);
@@ -353,6 +371,7 @@ void Game::updatePause() {
     }
     if(IsKeyPressed(KEY_ENTER)) {
         PlaySound(clickSound);
+        saveHighScore();
         currentState = GameState::PLAY;
         SetMusicVolume(gameplayMusic, 1.0f);
         StopMusicStream(gameplayMusic);
@@ -501,10 +520,11 @@ void Game::drawPlay() {
     }
     const int BAR_HEIGHT = 40;
     DrawRectangle(0, 0, SCREEN_WIDTH, BAR_HEIGHT, PURPLE);
-    Color scoreColor = {60, 30, 60, 255};    
-    int scoreSize = TEXT_SIZE - 15;
+    Color scoreColor = {60, 30, 60, 255};
+    Color highScoreColor = {185, 108, 0, 255};
+    int scoreSize = SCORE_SIZE * multiplierForNewHighscore;
     std::string highScoreText = "High Score: " + std::to_string(getHighScoreForDiffLevel());
-    DrawText(highScoreText.c_str(), 15, (BAR_HEIGHT - scoreSize) / 2, scoreSize, scoreColor);
+    DrawText(highScoreText.c_str(), 15, (BAR_HEIGHT - scoreSize) / 2, scoreSize, highScoreColor);
     const int HEART_SIZE = 30;
     const int HEART_SPACING = 5;
     for(int i = 0; i < MAX_LIVES; i++) {
@@ -520,7 +540,8 @@ void Game::drawPlay() {
     int leftEdge = 15 + highScoreTextWidth;
     int rightEdge = SCREEN_WIDTH - (MAX_LIVES * (HEART_SIZE + HEART_SPACING)) - 10;
     int centerX = (leftEdge + rightEdge) / 2 - scoreTextWidth / 2;
-    DrawText(scoreText.c_str(), centerX, (BAR_HEIGHT - scoreSize) / 2, scoreSize, scoreColor);
+
+    DrawText(scoreText.c_str(), centerX, (BAR_HEIGHT - scoreSize) / 2, scoreSize, (newHighScoreFlag)?highScoreColor:scoreColor);
 
     if(redFlashCounter){
         drawFlash();
@@ -636,4 +657,9 @@ void Game::drawFlash() {
 
 int Game::findLetterSpacing(int fontSize){
     return MeasureText("AB", fontSize) - (MeasureText("A", fontSize) + MeasureText("B", fontSize));
+}
+
+void Game::newHighScore(){
+    float progress = highScoreTimer / highScoreDuration;
+    multiplierForNewHighscore = 1.0f + 0.3f * sin(progress * 3.14159f * 6);
 }
