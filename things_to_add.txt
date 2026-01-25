@@ -1,17 +1,7 @@
 things to add to WordWorship:
 
-- Display highscores on homepage for each difficulty level
+- Clean up the word bank and make the distribution of words more even
 
-- Improve overall design
-
-- Fix structure of project (build setup etc.)
-
-- Figure out how to package
-
-- Audio controls (music and sfx volume)
-
-- Mouse support for menu stuff atleast
+- Figure out how to package and distribute
 
 - Zen mode
-
-- Complete refactor of code with proper object orientation (might be required for things like mouse controls etc)

@@ -30,6 +30,9 @@ private:
     float highScoreTimer = 0.0f;
     float highScoreDuration = 2.0f;
     bool newHighScoreFlag = false;
+    bool firstPlay = false;
+    int minusPressedCounter = 0;
+    int plusPressedCounter = 0;
 
     int findLetterSpacing(int fontSize);
     
@@ -38,6 +41,7 @@ private:
     void drawPause();
     void drawGameOver();
     void drawFlash();
+    void drawVolumeBar();
 
     void loadAudios();
     void unloadAudios();

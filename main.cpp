@@ -13,15 +13,19 @@ int main () {
 
     InitAudioDevice();
 
-    WordBank::loadWords();
+    WordBank::init();
     Game game = Game(SCREEN_WIDTH, SCREEN_HEIGHT);
 
     if(!IsAudioDeviceReady()){
         std::cerr << "Audio Device Not Ready!" << std::endl;
         return -1;
     }
+    
+    SetMasterVolume(0.7f);
 
     while (WindowShouldClose() == false){
+
+
         game.update();
         
         BeginDrawing();
