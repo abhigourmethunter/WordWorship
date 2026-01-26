@@ -9,6 +9,11 @@ int main () {
     const int SCREEN_HEIGHT = 600;
 
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Word Worship");
+   
+    Image icon = LoadImage("assets/art/icon.png");
+    SetWindowIcon(icon);
+    UnloadImage(icon);
+
     SetTargetFPS(60);
 
     InitAudioDevice();
