@@ -93,43 +93,6 @@ namespace WordBank {
         }
         return words[randomWordLength][rand() % words[randomWordLength].size()];
     }
-        
-
-    // std::string getRandomWordWithDifficulty(Difficulty difficulty) {
-    //     int limiter = 10;
-    //     int offset = 0;
-    //     switch(difficulty) {
-    //         case EASY:
-    //             {
-    //                 limiter = 4;
-    //                 break;
-    //             }
-    //         case MEDIUM:
-    //             {
-    //                 limiter = 10;
-    //                 break;
-    //             }
-    //         case HARD:
-    //             {
-    //                 limiter = 16;
-    //                 break;
-    //             }
-    //         case TEXPERT:
-    //             {
-    //                 limiter = 8;
-    //                 offset = 8;
-    //                 break;
-    //             }
-
-
-    //     }
-    //     int numLetters = rand() % (limiter+1);
-    //     if(words[numLetters + offset].empty()) {
-    //         numLetters = 5;
-    //         offset = 0;
-    //     }
-    //     return words[numLetters + offset][rand() % words[numLetters + offset].size()];
-    // }
 
     std::string getRandomWord() {
         int numLetters = rand() % MAX_WORD_LENGTH;

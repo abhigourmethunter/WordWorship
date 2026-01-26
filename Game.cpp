@@ -716,15 +716,15 @@ void Game::drawFlash() {
 void Game::drawVolumeBar(){
     Color minusColor = minusPressedCounter > 0 ? SKYBLUE : WHITE;
     Color plusColor = plusPressedCounter > 0 ? SKYBLUE : WHITE;
-
-    DrawText("-", SCREEN_WIDTH - 145, SCREEN_HEIGHT - 35, 20, minusColor);
-
+    
+    DrawText("[-]", SCREEN_WIDTH - 170, SCREEN_HEIGHT - 35, 20, minusColor);
+    
     for(int i = 0; i < 10; i++){
         Color barColor = (i < (int)(GetMasterVolume() * 10)) ? SKYBLUE : DARKGRAY;
-        DrawRectangle(SCREEN_WIDTH - 130 + i * 11, SCREEN_HEIGHT - 40, 10, 30, barColor);
+        DrawRectangle(SCREEN_WIDTH - 145 + i * 11, SCREEN_HEIGHT - 40, 10, 30, barColor);
     }
     
-    DrawText("+", SCREEN_WIDTH - 130 + 10 * 11 + 5, SCREEN_HEIGHT - 35, 20, plusColor);
+    DrawText("[+]", SCREEN_WIDTH - 145 + 10 * 11 + 5, SCREEN_HEIGHT - 35, 20, plusColor);
 }
 
 int Game::findLetterSpacing(int fontSize){
