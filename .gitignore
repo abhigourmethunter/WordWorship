@@ -1,4 +1,5 @@
 *.exe
 *.dsym
+*.dll
 main
 highscore.dat

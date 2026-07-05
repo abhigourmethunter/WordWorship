@@ -5,3 +5,5 @@ things to add to WordWorship:
 - Figure out how to package and distribute
 
 - Zen mode
+
+- MAKE IT RESIZABLE
