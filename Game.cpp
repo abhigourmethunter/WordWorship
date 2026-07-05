@@ -16,8 +16,10 @@ Game::Game(const int screen_width, const int screen_height)
       redFlashCounter(0),
       redFlash(false),
       firstPlay(false),
-      minusPressedCounter(0),
-      plusPressedCounter(0) {
+      minusDown(false),
+      minusDownTimeout(VOL_CHANGE_TIMEOUT),
+      plusDown(false),
+      plusDownTimeout(VOL_CHANGE_TIMEOUT) {
 
     heartTexture = LoadTexture("assets/art/Hearts/heart_animated_1.png");
 
@@ -91,33 +93,44 @@ void Game::setHighScoreForDiffLevel(int score){
 }
 
 void Game::update() {
-    if (IsKeyPressed(KEY_EQUAL)) {
-        plusPressedCounter = 6;
-        PlaySound(clickSound);
-        float vol = GetMasterVolume();
-        if(vol >= 1.0f){
-            vol = 1.0f;
-        }
-        else{
-            vol += 0.1f;
-        }
-        SetMasterVolume(vol);
-    }else{
-        plusPressedCounter--;
+    if(plusDownTimeout) plusDownTimeout--;
+    if(minusDownTimeout) minusDownTimeout--;
+    
+    if (IsKeyDown(KEY_EQUAL)){
+        plusDown = true;
+        if (!(plusDownTimeout)) {
+            plusDownTimeout = VOL_CHANGE_TIMEOUT;
+            PlaySound(clickSound);
+            float vol = GetMasterVolume();
+            if(vol >= 1.0f){
+                vol = 1.0f;
+            }
+            else{
+                vol += 0.1f;
+            }
+            SetMasterVolume(vol);
+}    
     }
-    if (IsKeyPressed(KEY_MINUS)) {
-        minusPressedCounter = 6;
-        PlaySound(clickSound);
-        float vol = GetMasterVolume();
-        if(vol <= 0.0f){
-            vol = 0.0f;
+    else{
+        plusDown = false;
+    }
+    if (IsKeyDown(KEY_MINUS)){
+        minusDown = true;
+        if (!(minusDownTimeout)) {
+            minusDownTimeout = VOL_CHANGE_TIMEOUT;
+            PlaySound(clickSound);
+            float vol = GetMasterVolume();
+            if(vol <= 0.0f){
+                vol = 0.0f;
+            }
+            else{
+                vol -= 0.1f;
+            }
+            SetMasterVolume(vol);
         }
-        else{
-            vol -= 0.1f;
-        }
-        SetMasterVolume(vol);
-    }else{
-        minusPressedCounter--;
+    }
+    else{
+        minusDown = false;
     }
 
     switch (currentState)
@@ -714,8 +727,8 @@ void Game::drawFlash() {
 }
 
 void Game::drawVolumeBar(){
-    Color minusColor = minusPressedCounter > 0 ? SKYBLUE : WHITE;
-    Color plusColor = plusPressedCounter > 0 ? SKYBLUE : WHITE;
+    Color minusColor = minusDown ? SKYBLUE : WHITE;
+    Color plusColor = plusDown > 0 ? SKYBLUE : WHITE;
     
     DrawText("[-]", SCREEN_WIDTH - 170, SCREEN_HEIGHT - 35, 20, minusColor);
     

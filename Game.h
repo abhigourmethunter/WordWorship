@@ -19,6 +19,7 @@ private:
 
     Difficulty DIFFICULTY = Difficulty::MEDIUM;
     static constexpr float WORD_RATE_UPDATE_TIME = 10.0f;
+    static constexpr int VOL_CHANGE_TIMEOUT = 8;
     const int TEXT_SIZE = 50;
     const int SCORE_SIZE = 35;
     const int TITLE_SIZE = 70;
@@ -31,8 +32,10 @@ private:
     float highScoreDuration = 2.0f;
     bool newHighScoreFlag = false;
     bool firstPlay = false;
-    int minusPressedCounter = 0;
-    int plusPressedCounter = 0;
+    bool minusDown = false;
+    int minusDownTimeout = VOL_CHANGE_TIMEOUT;
+    bool plusDown = false;
+    int plusDownTimeout = VOL_CHANGE_TIMEOUT;
 
     int findLetterSpacing(int fontSize);
     

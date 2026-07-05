@@ -1,5 +1,7 @@
 things to add to WordWorship:
 
+- Volume never fully goes to 0 [BUG]
+
 - Add a nice README
 
 - Clean up the word bank and make the distribution of words more even
