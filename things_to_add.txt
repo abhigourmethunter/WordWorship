@@ -1,9 +1,11 @@
 things to add to WordWorship:
 
+- Add a nice README
+
 - Clean up the word bank and make the distribution of words more even
 
 - Figure out how to package and distribute
 
 - Zen mode
 
-- MAKE IT RESIZABLE
+- MAKE IT RESIZEABLE
